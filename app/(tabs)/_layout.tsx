@@ -1,35 +1,61 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { Tabs } from "expo-router";
+import { Image } from "react-native";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
-  );
+export default function TabsLayout(){
+    return (
+        <Tabs screenOptions={{
+            tabBarActiveTintColor:"#68d391",
+            tabBarInactiveTintColor: "white",
+            tabBarStyle:{
+                backgroundColor: "black",
+                opacity: 0.7,
+                height: 80,
+                paddingTop: 15,
+                borderRadius: 40,
+                marginHorizontal:5,
+                marginBottom: 5
+            },
+        }}>
+            <Tabs.Screen
+                name="(secs)"
+                options={{
+                    title:"Securities",
+                    headerShown:false,
+                    tabBarIcon:({focused}) => (
+                        <Image
+                            source={require("../../assets/images/stocks.png")}
+                            style={{width: 30,height: 30,
+                                tintColor: focused ? '#68d391': 'white'}}
+                        ></Image>
+                    )
+                }}
+            />
+            <Tabs.Screen
+                name="index"
+                options={{
+                    title:"Home",
+                    headerShown:false,
+                    tabBarIcon:({focused}) => 
+                    (<Image 
+                        source={require("../../assets/images/home.png")}
+                        style={{width: 30,height: 30,tintColor: focused ? '#68d391': 'white'}}
+                    ></Image>)
+                }}
+            />
+            <Tabs.Screen
+                name="(auth)"
+                options={{
+                    title:"Profile",
+                    headerShown:false,
+                    tabBarIcon:({focused}) => (
+                        <Image
+                            source={require("../../assets/images/prof.png")}
+                            style={{width: 30,height: 30,tintColor: focused ? '#68d391': 'white'}}
+                        ></Image>
+                    )
+                }}
+            />
+        </Tabs>
+    )
 }
