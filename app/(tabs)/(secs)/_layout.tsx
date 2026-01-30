@@ -34,8 +34,8 @@ export default function SecuritiesLayout(){
                         <Image 
                             source={portfolioImg}
                             style={{height: 30,
-                             width: 30,
-                             tintColor: pathname === "/portfolios" ? 'black': 'white'}}>
+                            width: 30,
+                            tintColor: pathname === "/portfolios" ? 'black': 'white'}}>
                             
                         </Image>
                     </TouchableOpacity>
