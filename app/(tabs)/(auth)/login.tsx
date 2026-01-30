@@ -15,22 +15,19 @@ const stylez = StyleSheet.create({
 export default function Login(props: any){
     const [email,setEmail] = useState<string>('');
     const [password,setPassword] = useState<string>('');
-    const {logged,login,logout,user} = useContext(AuthContext);
-    let [image,setImage] = useState<any>(null);
-    
+    const {login,logout,profile,loggedIn,} = useContext(AuthContext);
+    const [image,setImage] = useState<any>(null);
     useEffect(() => {
         const img = require("@/assets/images/splash-icon.png");
         setImage(img);
     },[])
-    const logIn = (email:string, pwd:string) => {
-        login(email,pwd)
-    }
-    
-    const logOut = () => {
-        console.log("logging out");
-        logout();
-    }
 
+    const logIn = async () => {
+        await login(email,password)
+        if(loggedIn){
+            router.navigate("/");
+        }
+    }
     const changeEmail = (newVal:string) => {
         setEmail(newVal);
     }
@@ -38,9 +35,8 @@ export default function Login(props: any){
     const changePwd = (newPwd:string) => {
         setPassword(newPwd);
     }
-    
     const router = useRouter();
-    const content = !logged ? (
+    const content = (loggedIn === false) ? (
         <>
             <View className="justify-center items-center mb-10">
                 <Image 
@@ -55,10 +51,10 @@ export default function Login(props: any){
             </View>
             <View className="w-11/12 bg-black rounded-3xl justify-center items-center p-10">
                 <View className="w-full items-center justify-center">
-                    <Text className="w-full text-white w-15 mx-5 my-2 text-2xl mb-2">Email:</Text>
+                    <Text className="w-full text-white w-15 mx-5 my-2 text-2xl mb-2">Username:</Text>
                     <TextInput className="w-full border-2 border-gray-400 p-2 rounded-xl text-xl focus:border-green-200" 
-                        placeholder="Your Email"
-                        placeholderTextColor={"white"}
+                        placeholder="Your Username"
+                        placeholderTextColor={"gray"}
                         style={{color: 'white'}}
                         onChangeText={text => changeEmail(text)}></TextInput>
                 </View>
@@ -68,7 +64,7 @@ export default function Login(props: any){
                     <TextInput className="w-full border-2 border-gray-400 p-2 rounded-xl text-xl focus:border-green-200"
                     secureTextEntry 
                     placeholder="Your Password"
-                    placeholderTextColor={"white"}
+                    placeholderTextColor={"gray"}
                     style={{color: 'white'}}
                     onChangeText={text => changePwd(text)}></TextInput>
                 </View>
@@ -77,7 +73,7 @@ export default function Login(props: any){
                         text="S I G N     I N" 
                         textColor="black"
                         textSize="2xl"
-                        onPress={() => logIn(email,password)} props={props}></ThemedButton>
+                        onPress={() => logIn()} props={props}></ThemedButton>
 
                 <View className="items-center flex-row justify-center">
                     <Text className="pr-5 text-white">Not Registered ?</Text>
@@ -85,18 +81,21 @@ export default function Login(props: any){
                         textColor="black"
                         textSize="2xl"
                         bgStyle="bg-white border-2 border-black rounded-xl bg-emerald-400 px-5"
-                        text="Sign Up" onPress={() => router.push("/register")} props={props}></ThemedButton>
+                        text="Sign Up" onPress={() => router.navigate("/register")}></ThemedButton>
                 </View>
             </View>
             </>
     ):(
         <>
             <View className="w-11/12 bg-gray-950 rounded-3xl justify-center items-center p-10">
+                <Text className="text-white text-lg">{profile?.firstName}</Text>
+                <Text className="text-white text-lg">{profile?.lastName}</Text>
+                <Text className="text-white text-lg">{profile?.email}</Text>
                 <ThemedButton 
                     textColor="black"
                     textSize="2xl"
                     bgStyle="bg-white border-2 border-black rounded-xl bg-emerald-400 px-5"
-                    text="Sign Out" onPress={() => logOut()} props={props}
+                    text="Sign Out" onPress={() => logout()}
                 ></ThemedButton>
             </View>
         </>

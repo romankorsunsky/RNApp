@@ -4,7 +4,7 @@ import { Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
-  const {user,logged} = useContext(AuthContext);
+  const {profile: user,logged} = useContext(AuthContext);
   let name = logged ? user?.fname : "John"
   const content = !logged ? (
     <View>

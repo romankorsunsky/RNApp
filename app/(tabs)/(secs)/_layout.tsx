@@ -7,9 +7,8 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 
 export default function SecuritiesLayout(){
-    const authContext = useContext(AuthContext)
+    const {loggedIn} = useContext(AuthContext)
     const portfolioImg = require("../../../assets/images/portfolio-icon.png")
-    const isHidden = authContext.logged; 
     const pathname = usePathname();
     return(
         <SafeAreaProvider>
@@ -25,7 +24,7 @@ export default function SecuritiesLayout(){
                     <NavButton href="/etfs" active={pathname === "/etfs"} label="ETFS">
                     </NavButton>
                     
-                    {isHidden ?
+                    {loggedIn ?
                     <Link href="/portfolios" asChild>
                     <TouchableOpacity 
                         className="items-center justify-center rounded-3xl px-3"

@@ -1,9 +1,7 @@
-import { Text, View } from "react-native";
+import TickersContainer from "@/components/TickersContainer";
 
 export default function Etfs(){
     return(
-        <View className="bg-white mt-2 pt-2 w-full items-center justify-center flex-1">
-            <Text>ETFS</Text>
-        </View>
+        <TickersContainer tickerType={"etf"}></TickersContainer>
     )
 }
