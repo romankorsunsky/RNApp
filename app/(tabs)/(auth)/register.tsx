@@ -1,5 +1,5 @@
 import ThemedButton from '@/components/ThemedButton';
-import { AuthContext } from '@/contexts/AuthContext';
+import { API_BASE_URL, AuthContext } from '@/contexts/AuthContext';
 import { RegistrationForm } from '@/Types/Types';
 import { useRouter } from 'expo-router';
 import { useContext, useState } from 'react';
@@ -54,7 +54,7 @@ export default function Register(props: any){
         const formStr = JSON.stringify(regForm);
         console.log(`Registering with \n ${formStr}`)
         const request:Request = new Request(
-            "http://10.0.0.5:5008/api/v1/users/register",
+            API_BASE_URL+ "/users/register",
             {
                 method: "POST",
                 body: formStr,

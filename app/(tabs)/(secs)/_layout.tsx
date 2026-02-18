@@ -1,5 +1,6 @@
 import NavButton from "@/components/NavButton";
 import { AuthContext } from "@/contexts/AuthContext";
+import { PortfolioContextProvider } from "@/contexts/PortfolioContext";
 import { Link, Redirect, Slot, usePathname } from "expo-router";
 import { useContext } from "react";
 import { Image, TouchableOpacity, View } from "react-native";
@@ -11,6 +12,7 @@ export default function SecuritiesLayout(){
     const portfolioImg = require("../../../assets/images/portfolio-icon.png")
     const pathname = usePathname();
     return(
+        <PortfolioContextProvider>
         <SafeAreaProvider>
             <Redirect href={"/stocks"}></Redirect>
             <SafeAreaView className="items-center bg-green-400">
@@ -45,5 +47,6 @@ export default function SecuritiesLayout(){
                 <Slot/>
             </View>
         </SafeAreaProvider>
+        </PortfolioContextProvider>
     )
 }

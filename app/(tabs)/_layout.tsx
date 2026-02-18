@@ -25,8 +25,7 @@ export default function TabsLayout(){
                     tabBarIcon:({focused}) => (
                         <Image
                             source={require("../../assets/images/stocks.png")}
-                            style={{width: 30,height: 30,
-                                tintColor: focused ? '#68d391': 'white'}}
+                            style={{width: 30,height: 30,tintColor: focused ? '#68d391': 'white'}}
                         ></Image>
                     )
                 }}

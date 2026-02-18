@@ -11,7 +11,7 @@ export const AuthContext = createContext<AuthState>(
         loggedIn: false,
     }
 )
-export const API_BASE_URL:string = "http://10.0.0.5:5008/api/v1/";
+export const API_BASE_URL:string = "http://10.0.0.9:5008/api/v1/";
 const profileKey = "profile";
 const accessTokenKey = "access-token";
 const idTokenKey = "id-token";
@@ -57,7 +57,7 @@ export function AuthProvider({children} : PropsWithChildren){
             
             accessTokenRef.current = token.accessToken;
             console.log('token = ' + accessTokenRef.current);
-            const profileReq = new Request(API_BASE_URL + `users/${username}/profile`,{
+            const profileReq = new Request(API_BASE_URL + `users/profile`,{
                 method: "GET"
             });
             const profileResponse = await fetchWrapper(profileReq);

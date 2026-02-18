@@ -1,21 +1,32 @@
-import StockItem from "@/components/StockItem";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { API_BASE_URL } from "@/contexts/AuthContext";
 import { StockTicker, TickerContainerProps, TimedDataWithSymbol } from "@/Types/Types";
-import { useEffect, useState } from "react";
-import { Button, Text, View } from "react-native";
+import { useIsFocused } from "@react-navigation/native";
+import { useEffect, useRef, useState } from "react";
+import { Button, Modal, Text, View } from "react-native";
+import StockItemExtended from "./StockItemExtended";
+import StockItemWrapper from "./StockItemWrapper";
 
 
 export default function TickersContainer({tickerType}:TickerContainerProps){
-    let [symbolNames,setSymbolNames] = useState<string[]>([]);
-    let [currPage,setCurrPage] = useState<number>(0);
-    let [totalPages,setTotalPages] = useState<number>(1);
-    let [currTickers,setCurrTickers] = useState<StockTicker[]>([]);
-    let [fetching,setFetching] = useState<boolean>(false);
-    const pageSize :number = 5;
-    const namesCSV = currTickers.map(x => x.symbol).join(",");
+    const [symbolNames,setSymbolNames] = useState<string[]>([]);
+    const [currPage,setCurrPage] = useState<number>(0);
+    const [totalPages,setTotalPages] = useState<number>(1);
+    const [currTickers,setCurrTickers] = useState<StockTicker[]>([]);
+    const [fetching,setFetching] = useState<boolean>(false);
+    const [modalVisible,setModalVisible] = useState<boolean>(false);
+    
+    const fullDataSymbolRef = useRef<string>("");
+
+    const baseURI:string = API_BASE_URL + "tickers/";
+    const pageSize:number = 5;
+    const namesCSV:string = currTickers.map(x => x.symbol).join(",");
+    const isFocused:boolean = useIsFocused();
+
     useEffect(() => {
         const fetchStockSymbols = async function(){
             setFetching(true);
-            const uri = "http://10.0.0.5:5008/api/v1/tickers/" + tickerType + "/symbolnames";
+            const uri = baseURI + tickerType + "/symbolnames";
             try {
                 let length:number = 0;
                 const resp = await fetch(uri);
@@ -34,7 +45,7 @@ export default function TickersContainer({tickerType}:TickerContainerProps){
     
     useEffect(() => {
         async function fetchTickers(symbols:string,signal:AbortSignal){
-            const uri = "http://10.0.0.5:5008/api/v1/tickers/" + tickerType + "/symbols/" + symbols;
+            const uri = baseURI + tickerType + "/symbols/" + symbols;
             try{
                 const resp = await fetch(uri,{signal:signal});
                 let processed: StockTicker[] = await resp.json();
@@ -64,34 +75,32 @@ export default function TickersContainer({tickerType}:TickerContainerProps){
             let newTickers = await fetchTickers(symbols.join(","),signal);
             if(!(newTickers === undefined)){
                 setCurrTickers(newTickers);
-                //setFetching(false);
             }
         }
         const controller: AbortController = new AbortController();
         const signal:AbortSignal = controller.signal;
+
         if(symbolNames.length === 0)
             return () => controller.abort();
+
         loadNewTickers(currPage,signal);
+
         return () => controller.abort();
     },[currPage, symbolNames]);
 
     useEffect(() => {
-        if(namesCSV === "")
+        if(namesCSV === "" || !isFocused)
             return;
         async function fetchPrices(abortSignal:AbortSignal){
             try{
-                const uri:string = `http://10.0.0.5:5008/api/v1/tickers/${tickerType}/prices/${namesCSV}`;
+                const uri:string = `${baseURI}${tickerType}/prices/${namesCSV}`;
                 const resp = await fetch(uri,{
                     signal: abortSignal
                 });
                 const timedPrices:TimedDataWithSymbol[] = await resp.json();
-                console.log(`resp = ${JSON.stringify(timedPrices)}`);
                 const symDict:Map<string,number> = new Map<string,number>();
                 for(let tp of timedPrices){
                     symDict.set(tp.symbol,tp.price);
-                }
-                for(let tp of timedPrices){
-                    console.log(symDict.get(tp.symbol));
                 }
                 setCurrTickers(previous => previous.map(x => {
                     if(symDict.has(x.symbol)) {
@@ -124,29 +133,46 @@ export default function TickersContainer({tickerType}:TickerContainerProps){
             },5000);
             
         return function cleanup() {
-            console.log(`supposed to be unmounting...`);
             controller.abort();
             if(intervalId){
                 clearInterval(intervalId);}
             }
-    },[namesCSV]);
+    },[namesCSV,isFocused]);
 
+    const setModalInfo = async (symbol:string):Promise<void> => {
+        fullDataSymbolRef.current = symbol;
+        setModalVisible(true);
+    }
+    const closeModal = () => {
+        setModalVisible(false);
+    }
     return(
         <View className="flex-1 justify-between mt-2 w-full h-full bg-white items-center">
             {!fetching ? 
                 (<View className="bg-whites gap-y-2 ">
                 {
                     currTickers.map(ticker => {
-                        return <StockItem 
+                        return <StockItemWrapper
                             symbol={ticker.symbol}
                             longName={ticker.longName}
                             key={ticker.symbol}
-                            assetType={ticker.tickerType}
                             price={ticker.price}
-                        ></StockItem>
+                            isUp={true}
+                            setModalInfo={setModalInfo}
+                        ></StockItemWrapper>
                         }
                     )
                 }
+                    <Modal
+                        visible={modalVisible}
+                        onRequestClose={()=> setModalVisible(false)}
+                        animationType="slide"
+                        presentationStyle="pageSheet">
+                            <StockItemExtended 
+                                symbol={fullDataSymbolRef.current}
+                                tickerType={tickerType}
+                                closeModal={() => closeModal()}/>
+                    </Modal>
                 </View>)
                  : 
                 (<View className="justify-center items-center h-full">
