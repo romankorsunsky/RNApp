@@ -3,6 +3,9 @@
 # dependencies
 node_modules/
 
+#myown
+config.tsx
+
 # Expo
 .expo/
 dist/

@@ -1,7 +1,7 @@
 import { AuthenticationRequest, AuthenticationResponse, AuthState, Profile } from "@/Types/Types";
 import * as SecureStore from 'expo-secure-store';
 import { createContext, PropsWithChildren, useEffect, useRef, useState } from "react";
-
+import API_BASE from '../config';
 export const AuthContext = createContext<AuthState>(
     {
         profile:null,
@@ -11,7 +11,8 @@ export const AuthContext = createContext<AuthState>(
         loggedIn: false,
     }
 )
-export const API_BASE_URL:string = "http://10.0.0.9:5008/api/v1/";
+export const API_BASE_URL:string = API_BASE;
+
 const profileKey = "profile";
 const accessTokenKey = "access-token";
 const idTokenKey = "id-token";
