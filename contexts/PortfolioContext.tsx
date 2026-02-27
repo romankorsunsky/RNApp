@@ -1,4 +1,4 @@
-import { Portfolio, PortfolioState } from "@/Types/Types";
+import { Portfolio, PortfolioState, PositionEntry } from "@/Types/Types";
 import React, { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
 import { API_BASE_URL, AuthContext } from "./AuthContext";
 
@@ -10,7 +10,8 @@ export const PortfolioContext = createContext<PortfolioState>(
         clearPortfolios : () => {throw new Error("Didn't init PorfolioContext");},
         getPortfolioByDisplayName : (name:string) => {throw new Error("Didn't init PorfolioContext");},
         addPortfolio: (ptf: Portfolio) => {throw new Error("Didn't init PorfolioContext");},
-        fetchPortfolios: async (sig: AbortSignal | null) => {throw new Error("stahp it");},
+        fetchPortfolios: (sig: AbortSignal | null) => {throw new Error("stahp it");},
+        removePosition: (str:string) => {throw new Error("Didn't init PorfolioContext")}
     }
 );
 
@@ -56,7 +57,6 @@ export function PortfolioContextProvider({children}:PropsWithChildren){
             const response = await fetchWrapper(request);
             if(response.status === 200){
                 const portfolios: Portfolio[] = await response.json();
-                console.log(`[LOG] Portfolios[]: \n ${JSON.stringify(portfolios)}`);
                 setPortfolios(portfolios);
             }
         }
@@ -67,7 +67,22 @@ export function PortfolioContextProvider({children}:PropsWithChildren){
     const addPortfolio = (ptf:Portfolio) => {
         setPortfolios(old => old.concat([ptf]));
     }
-    return <PortfolioContext.Provider value={{fetchPortfolios,clearPortfolios,getPortfolioByDisplayName,addPortfolio,portfolios}}>
+    const removePosition = (ptfId:string,posId:string) => {
+        const ptf:Portfolio | undefined = portfolios.find(ptf => ptf.id === ptfId);
+        if(!ptf) return;
+        const newPostions:PositionEntry[] = ptf.positions.filter(pos => pos.id !== posId);
+        setPortfolios(portfolios.map(ptf => {
+            if(ptf.id !== ptfId)
+                return ptf;
+            const newPtf:Portfolio ={id:ptf.id,displayName:ptf.displayName,portfolioType:ptf.portfolioType,
+                positions:newPostions
+            };
+            console.log("JSON.stringify(newPtf)");
+            return newPtf;
+        }));
+    }
+    return <PortfolioContext.Provider value={{fetchPortfolios,clearPortfolios,removePosition,
+        getPortfolioByDisplayName,addPortfolio,portfolios}}>
         {children}
     </PortfolioContext.Provider>
 }

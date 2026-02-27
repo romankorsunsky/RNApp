@@ -1,8 +1,10 @@
+import ReportComponent from '@/components/ReportComponent';
 import ThemedButton from '@/components/ThemedButton';
-import { AuthContext } from '@/contexts/AuthContext';
+import { API_BASE_URL, AuthContext } from '@/contexts/AuthContext';
+import { Report } from '@/Types/Types';
 import { useRouter } from 'expo-router';
-import { useContext, useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useContext, useRef, useState } from 'react';
+import { Image, Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import '../../../global.css';
 const stylez = StyleSheet.create({
@@ -11,22 +13,23 @@ const stylez = StyleSheet.create({
         height: 80
     }
 })
-
+enum DeliveryOption {
+    MAIL = "mail",
+    DEFAULT = "default"
+}
+const baseUri:string = `${API_BASE_URL}reports/annual?delivery=`;
 export default function Login(props: any){
     const [email,setEmail] = useState<string>('');
     const [password,setPassword] = useState<string>('');
-    const {login,logout,profile,loggedIn,} = useContext(AuthContext);
-    const [image,setImage] = useState<any>(null);
-    useEffect(() => {
-        const img = require("@/assets/images/splash-icon.png");
-        setImage(img);
-    },[])
+    const {login,logout,getProfile,loggedIn,fetchWrapper} = useContext(AuthContext);
+    const image = require("@/assets/images/splash-icon.png");
+    const [modalVisible,setModalVisible] = useState<boolean>(false);
+    const reportRef = useRef<Report | null>(null);
+    const router = useRouter();
+    const reportUriRef = useRef<string>(baseUri + DeliveryOption.DEFAULT);
 
     const logIn = async () => {
-        await login(email,password)
-        if(loggedIn){
-            router.navigate("/");
-        }
+        await login(email,password);
     }
     const changeEmail = (newVal:string) => {
         setEmail(newVal);
@@ -35,7 +38,35 @@ export default function Login(props: any){
     const changePwd = (newPwd:string) => {
         setPassword(newPwd);
     }
-    const router = useRouter();
+    function getReport(){
+        async function doWork(){
+            const request:Request = new Request(reportUriRef.current,{
+                method: "GET"
+            });
+            try{
+                const resp:Response = await fetchWrapper(request);
+                if(resp.status !== 200){
+                    alert("Failed to generate report");
+                    console.log(resp.status);
+                }
+                else
+                {
+                    const reportData:Report = await resp.json();
+                    reportRef.current = reportData;
+                    setModalVisible(true);
+                }
+            }
+            catch(e){
+                if(e instanceof Error){
+                    console.log("[LOG]" + e.message);
+                }
+            }
+        }
+        doWork();
+    }
+    function closeModal(): void {
+        setModalVisible(false);
+    }
     const content = (loggedIn === false) ? (
         <>
             <View className="justify-center items-center mb-10">
@@ -88,9 +119,9 @@ export default function Login(props: any){
     ):(
         <>
             <View className="w-11/12 bg-gray-950 rounded-3xl justify-center items-center p-10">
-                <Text className="text-white text-lg">{profile?.firstName}</Text>
-                <Text className="text-white text-lg">{profile?.lastName}</Text>
-                <Text className="text-white text-lg">{profile?.email}</Text>
+                <Text className="text-white text-lg">{getProfile()?.firstName}</Text>
+                <Text className="text-white text-lg">{getProfile()?.lastName}</Text>
+                <Text className="text-white text-lg">{getProfile()?.email}</Text>
                 <ThemedButton 
                     textColor="black"
                     textSize="2xl"
@@ -98,6 +129,22 @@ export default function Login(props: any){
                     text="Sign Out" onPress={() => logout()}
                 ></ThemedButton>
             </View>
+            <ThemedButton 
+                    textColor="black"
+                    textSize="2xl"
+                    bgStyle="w-96 bg-white border-2 border-black rounded-xl bg-emerald-400 px-5 mt-8 h-20
+                        justify-center"
+                    text="GET REPORT" onPress={() => getReport()}
+            ></ThemedButton>
+            <Modal
+                visible={modalVisible}
+                onRequestClose={()=> setModalVisible(false)}
+                animationType="slide"
+                presentationStyle="pageSheet">
+                    <ReportComponent 
+                        closeModal={() => closeModal()}
+                        report={reportRef.current}/> 
+            </Modal>
         </>
     )
 
@@ -112,3 +159,4 @@ export default function Login(props: any){
     )
     
 }
+

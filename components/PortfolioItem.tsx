@@ -15,7 +15,7 @@ export default function PortfolioItem({portfolioData}:PortfolioItemProps){
     return (
         <View style={{width: deviceWidth}}>
             <TouchableOpacity onPress={() => expandList()}>
-                <View className="border-black border-t-2 border-b-2 flex-row justify-between
+                <View className="border-black border-b-2 flex-row justify-between
                             p-2">
                     <View className="flex-1 mr-2">
                         <View className="flex-row pt-2 items-center">

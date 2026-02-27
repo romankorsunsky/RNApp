@@ -4,7 +4,9 @@ import ThemedButton from "@/components/ThemedButton";
 import { PortfolioContext } from "@/contexts/PortfolioContext";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { Modal, Text, View } from "react-native";
+import { Dimensions, Modal, ScrollView, Text, View } from "react-native";
+
+const deviceWidth = Dimensions.get("screen").width;
 
 export default function Portfolios(){
     const [modalVisible,setModalVisible] = useState<boolean>(false);
@@ -24,7 +26,6 @@ export default function Portfolios(){
 
             async function load(){
                 try{
-                    setLoading(true);
                     await fetchPortfolios(controller.signal);
                 }
                 catch(e)
@@ -44,17 +45,24 @@ export default function Portfolios(){
             {!loading ? 
                 (
                 <View>
-                    <View className="w-96 p-2 items-center">
-                        {
-                            portfolios.map(p => {
-                                return <PortfolioItem 
-                                    portfolioData = {p}
-                                    closeModal={() => closeModal()}
-                                    key = {p.id}>
-                                </PortfolioItem>
-                            })
-                        }
-                    </View>
+                    <ScrollView style={{
+                        width: deviceWidth,
+                    }}
+                    showsVerticalScrollIndicator={false}>
+                        <View style={{
+                            width: deviceWidth
+                        }}>
+                            {
+                                portfolios.map(p => {
+                                    return <PortfolioItem 
+                                        portfolioData = {p}
+                                        closeModal={() => closeModal()}
+                                        key = {p.id}>
+                                    </PortfolioItem>
+                                })
+                            }
+                        </View>
+                    </ScrollView>
                     <View className="w-50">
                         <ThemedButton 
                             textColor="black"

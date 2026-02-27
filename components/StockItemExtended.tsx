@@ -1,6 +1,6 @@
 import { API_BASE_URL, AuthContext } from "@/contexts/AuthContext";
 import { PortfolioContext } from "@/contexts/PortfolioContext";
-import { BoundsPair, ChartData, LineChartData, LineChartDataItem, PositionConfirmation, PositionCreationRequest, PositionDirection, PositionVerification, ProblemResult, StockItemExtendedProps, TimedPrice } from "@/Types/Types";
+import { BoundsPair, ChartData, LineChartData, LineChartDataItem, PositionConfirmation, PositionCreationRequest, PositionDirection, PositionVerification, StockItemExtendedProps, TimedPrice } from "@/Types/Types";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Alert, Dimensions, Text, TextInput, View } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
@@ -69,7 +69,9 @@ export default function StockItemExtended({symbol,tickerType,closeModal}:StockIt
         return () => controller.abort();
     },[])
 
-    useEffect(() => {},[positionCreated])
+    useEffect(() => {
+        console.log("[LOG] Should've re-rendered!");
+    },[positionCreated])
 
 
     function initData(chartData:ChartData): void{
@@ -184,27 +186,31 @@ export default function StockItemExtended({symbol,tickerType,closeModal}:StockIt
             Quantity: quantity
         }
         const jsonBody:string = JSON.stringify(posCreationReq);
+        console.log("postBody: " + jsonBody);
         request = new Request(posReqUri,{
             method: "POST",
             body: jsonBody
         });
         try{
             const resp:Response = await fetchWrapper(request);
+            console.log(resp.status);
             if(resp.status === 403){
-                const problem:ProblemResult = await resp.json();
-                const msg = problem.Problem;
-                alert(msg);
+                const problem:string = await resp.json();
+                alert(problem);
+                return;
             }
             if(resp.status === 501){
                 alert("Internal Error, Try again later, sorry");
+                return;
             }
             const verification: PositionVerification = await resp.json();
             console.log(`Verification: ${JSON.stringify(verification)}`);
             confirmAlert(verification,ptfId);
         }
         catch(e){
-            if(e instanceof Error)
-                console.log(`[LOG] ${e.message}`)
+            if(e instanceof Error){
+                console.log(`[LOG] in createPosRequest ${e.message}`);
+            }
         }
     }
     function confirmAlert(verification: PositionVerification,ptfId:string){
@@ -232,7 +238,7 @@ export default function StockItemExtended({symbol,tickerType,closeModal}:StockIt
                 body:jsonBody
             })
             const response:Response = await fetchWrapper(request);
-            if(response.status !== 200){
+            if(response.status !== 200 && response.status !== 201){
                 console.log(`[LOG] response status = ${response.status}`);
                 setPositionCreated(false);
             }
@@ -385,10 +391,14 @@ export default function StockItemExtended({symbol,tickerType,closeModal}:StockIt
                                 textAlign: 'center'
                             }}
                             onChangeText={(val:string) => {
+                                if(val === ""){
+                                    setQuantity(0);
+                                    return;
+                                }
                                 if(isNaN(Number.parseInt(val)) === false)
-                                setQuantity(Number.parseInt(val));
+                                    setQuantity(Number.parseInt(val));
                             }}
-                            value={quantity.toString()}
+                            value={quantity === 0 ? "" : quantity.toString()}
                             placeholder="Select Quantity"></TextInput>
                         <ThemedButton 
                             textColor="white"

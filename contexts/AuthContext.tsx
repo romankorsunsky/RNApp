@@ -4,8 +4,10 @@ import { createContext, PropsWithChildren, useEffect, useRef, useState } from "r
 import API_BASE from '../config';
 export const AuthContext = createContext<AuthState>(
     {
-        profile:null,
-        login: async (username:string,password:string) => {return},
+        getProfile: () => {throw new Error("Not initialized")},
+        login: async (username:string,password:string) => {
+            throw new Error("Not Initialized Auth Context");
+         },
         logout: () => {},
         fetchWrapper: async () => {throw new Error("Not Initialized Auth Context")},
         loggedIn: false,
@@ -18,18 +20,20 @@ const accessTokenKey = "access-token";
 const idTokenKey = "id-token";
 
 export function AuthProvider({children} : PropsWithChildren){
-    const [profile,setProfile] = useState<Profile | null>(null);
+    const profileRef = useRef<Profile | null>(null);
     const accessTokenRef = useRef<string | null>(null);
     const [loggedIn,setLoggedIn] = useState<boolean>(false);
+
     useEffect(() => {
         const initToken = async function(){
             try{ //try to get tokens from Secure Store
                 const accessTok = await SecureStore.getItemAsync(accessTokenKey);
                 const idTok = await SecureStore.getItemAsync(idTokenKey);
-                accessTokenRef.current = accessTok;
+                if(idTok !== null)
+                    accessTokenRef.current = accessTok;
                 const res = await SecureStore.getItemAsync(profileKey);
                 if(res !== null)
-                    setProfile(JSON.parse(res));
+                    profileRef.current = JSON.parse(res);
             }
             catch (error){
                 if(error instanceof Error){
@@ -39,6 +43,10 @@ export function AuthProvider({children} : PropsWithChildren){
         }
         initToken();
     },[])
+
+    const getProfile = () => {
+        return profileRef.current;
+    }
     const login = async (username:string, pwd:string) =>
     {   
         const authVal: AuthenticationRequest = {Username:username,Password:pwd};
@@ -58,21 +66,19 @@ export function AuthProvider({children} : PropsWithChildren){
             
             accessTokenRef.current = token.accessToken;
             console.log('token = ' + accessTokenRef.current);
-            const profileReq = new Request(API_BASE_URL + `users/profile`,{
+            const profileReq = new Request(API_BASE_URL + "users/profile",{
                 method: "GET"
             });
             const profileResponse = await fetchWrapper(profileReq);
             const prof:Profile = await profileResponse.json();
             await SecureStore.setItemAsync(accessTokenKey,token.accessToken);
-            setProfile(prof);
+            profileRef.current = prof;
+            setLoggedIn(true);
         }
         catch(error){
             if(error instanceof Error){
                 console.log(error);
             }
-        }
-        finally{
-            setLoggedIn(true);
         }
     }
     const logout = async () =>
@@ -94,7 +100,7 @@ export function AuthProvider({children} : PropsWithChildren){
         return response;
     }
     return(
-        <AuthContext.Provider value={{fetchWrapper,profile,login,logout,loggedIn}}>
+        <AuthContext.Provider value={{fetchWrapper,getProfile,login,logout,loggedIn}}>
             {children}
         </AuthContext.Provider>
     )

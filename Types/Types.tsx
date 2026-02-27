@@ -57,7 +57,6 @@ export interface StockItemWrapperProps{
 export interface PortfolioAddProp{
     closeModal: () => void;
 }
-
 export interface BoundsPair{
     lowerBound:number;
     upperBound:number;
@@ -65,6 +64,10 @@ export interface BoundsPair{
 export interface TimedPrice {
     price: number;
     date: string;
+}
+export interface ReportModalProps{
+    closeModal: () => void;
+    report: Report | null;
 }
 export interface PositionItemProp{
     ptfId: string;
@@ -79,10 +82,11 @@ export interface AuthenticationRequest{
     Password:string;
 }
 export interface PositionEntry{
+    id:string;
     symbol:string;
     quantity:number;
     price:number;
-    positionType: PositionDirection
+    positionType: PositionDirection;
 }
 export interface PositionCreationRequest{
     Symbol:string;
@@ -90,7 +94,7 @@ export interface PositionCreationRequest{
     PositionType: PositionDirection
 }
 export interface ProblemResult{
-    Problem:string;
+    problem:string;
 }
 export interface PositionVerification{
     id:string;
@@ -145,20 +149,41 @@ export interface Profile {
     firstName: string;
     lastName: string;
     email: string;
+    balance: string;
 }
-
+export interface Report {
+    currentBalance: number;
+    totalPortfoliosWorth: number;
+    openShortPositionsCount: number;
+    openLongPositionsCount: number;
+    perAssetGain: AssetToGain[];
+}
+export interface AssetToGain{
+    assetName:string;
+    gain: number;
+}
 export type AuthState = {
     login: (email:string, password:string) => Promise<void>;
     loggedIn: boolean;
     logout: () => void;
-    profile: Profile | null;
+    getProfile: () => Profile | null;
     fetchWrapper: (req:Request) => Promise<Response>;
 }
 
+export interface NewsItem{
+    id:string;
+    title: string;
+    content: string;
+}
+export interface NewsItemProps{
+    title:string;
+    content:string;
+}
 export type PortfolioState = {
     portfolios: Portfolio[];
     addPortfolio: (ptf:Portfolio) => void;
     clearPortfolios: () => void;
+    removePosition: (ptfId:string,posId:string) => void;
     getPortfolioByDisplayName: (name:string) => Portfolio | null;
     fetchPortfolios: (abortSignal:AbortSignal | null) => Promise<void>;
 }
