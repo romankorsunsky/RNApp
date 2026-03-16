@@ -65,7 +65,6 @@ export function AuthProvider({children} : PropsWithChildren){
             const token:AuthenticationResponse = await response.json();
             
             accessTokenRef.current = token.accessToken;
-            console.log('token = ' + accessTokenRef.current);
             const profileReq = new Request(API_BASE_URL + "users/profile",{
                 method: "GET"
             });

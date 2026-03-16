@@ -11,7 +11,7 @@ export const PortfolioContext = createContext<PortfolioState>(
         getPortfolioByDisplayName : (name:string) => {throw new Error("Didn't init PorfolioContext");},
         addPortfolio: (ptf: Portfolio) => {throw new Error("Didn't init PorfolioContext");},
         fetchPortfolios: (sig: AbortSignal | null) => {throw new Error("stahp it");},
-        removePosition: (str:string) => {throw new Error("Didn't init PorfolioContext")}
+        removePosition: (str:string,posid:string) => {throw new Error("Didn't init PorfolioContext")}
     }
 );
 
@@ -77,7 +77,6 @@ export function PortfolioContextProvider({children}:PropsWithChildren){
             const newPtf:Portfolio ={id:ptf.id,displayName:ptf.displayName,portfolioType:ptf.portfolioType,
                 positions:newPostions
             };
-            console.log("JSON.stringify(newPtf)");
             return newPtf;
         }));
     }

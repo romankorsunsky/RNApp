@@ -12,6 +12,7 @@ export default function PortfolioCreator({closeModal}:PortfolioAddProp){
     const [ptfType,setPtfType] = useState<PortfolioType>(PortfolioType.REGULAR);
     const [name,setName] = useState<string>("");
     const router = useRouter();
+    
     const addPortfolioRequest = async function(){
         const porfolioRequest:PortfolioCreationRequest = {
             DisplayName: name,
